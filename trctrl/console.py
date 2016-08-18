@@ -14,17 +14,21 @@ def setup():
     subparsers = parser.add_subparsers(dest='cmd')
 
     ls = subparsers.add_parser('list', help="List torrents")
-    ls.add_argument('-s', '--status', action='store', default='all')
+    ls.add_argument('-s', '--status', action='store', default='all', choices=[
+        'seeding', 'running', 'stopped'
+    ])
 
-    show = subparsers.add_parser('show', help="Show information about specific torrent.")
-    add = subparsers.add_parser('add', help="Add torrent to list.")
-    add.add_argument('torrent')
+    show = subparsers.add_parser('show', help="Show information about torrent.")
+    show.add_argument('identifier')
 
-    pause = subparsers.add_parser('pause', help="Pause torrent.")
-    pause.add_argument('identifier')
+    add = subparsers.add_parser('add', help="Add torrent by to list.")
+    add.add_argument('torrent', help="File or url.")
 
-    start = subparsers.add_parser('start', help="Pause torrent.")
-    start.add_argument('identifier')
+    stop = subparsers.add_parser('stop', help="Stop torrent.")
+    stop.add_argument('identifier', nargs='+')
+
+    start = subparsers.add_parser('start', help="Start torrent.")
+    start.add_argument('identifier', nargs='+')
 
     delete = subparsers.add_parser('delete', help="Delete torrent.")
     update = subparsers.add_parser('update', help="Update torrent.")
@@ -35,15 +39,20 @@ def run(args):
     res = None
     if args.cmd == 'list':
         res = pprint(commands.list_torrents(args.status))
-    elif args.cmd == 'pause':
+    elif args.cmd == 'stop':
         commands.pause_torrents(args.identifier)
     elif args.cmd == 'start':
         commands.start_torrents(args.identifier)
     elif args.cmd == 'add':
         res = pprint(commands.add_torrent(args.torrent))
+    elif args.cmd == 'show':
+        res = pprint(commands.info(args.identifier))
 
     print(res)
 
-if __name__ == '__main__':
+def main():
     args = setup()
     run(args)
+
+if __name__ == '__main__':
+    main()

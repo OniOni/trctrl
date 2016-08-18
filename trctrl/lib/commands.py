@@ -69,3 +69,13 @@ def add_torrent(uri):
         ret = ['???']
 
     return ret
+
+def info(identifier):
+    c = rpc.TrClient()
+
+    res = c.send('torrent-get', {
+        'ids': [identifier],
+        'fields': ['id', 'name', 'status', 'eta', 'leftUntilDone']
+    }).json()
+
+    return [{k: v} for k,v in res['arguments']['torrents'][0].items()]
