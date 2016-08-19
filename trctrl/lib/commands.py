@@ -1,30 +1,32 @@
-from collections import OrderedDict
-from . import rpc
+from . import rpc, table
+
+STATUSES = {
+    'running': 4,
+    'seeding': 6,
+    'stopped': 0
+}
 
 
 def list_torrents(status):
     c = rpc.TrClient()
-    res = c.send('torrent-get', {'fields': ['id', 'name', 'status', 'hashString']}).json()
+    res = c.send('torrent-get', {
+        'fields': ['id', 'name', 'status', 'hashString', 'eta', 'leftUntilDone']
+    }).json()
 
     _all = False
     if status == 'all':
         _all = True
     else:
-        code = {
-            'running': 4,
-            'seeding': 6,
-            'stopped': 0
-        }[status]
+        code = STATUSES[status]
 
-    return [
-        OrderedDict([
-            ("id", t['id']),
-            ("name", t['name']),
-            ("status", t['status']),
-            ("hash", t['hashString'])
-        ]) for t in res['arguments']['torrents']
+    t = table.Table("id", "name", "status", "done")
+    t.append_rows([
+        {'id': t['hashString'], 'name': t['name'], 'status': t['status'], 'done': t['leftUntilDone']}
+        for t in res['arguments']['torrents']
         if _all or t['status'] == code
-    ]
+    ])
+
+    return t
 
 def pause_torrents(ids):
     c = rpc.TrClient()

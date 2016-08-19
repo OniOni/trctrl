@@ -38,7 +38,7 @@ def setup():
 def run(args):
     res = None
     if args.cmd == 'list':
-        res = pprint(commands.list_torrents(args.status))
+        res = commands.list_torrents(args.status)
     elif args.cmd == 'stop':
         commands.pause_torrents(args.identifier)
     elif args.cmd == 'start':
