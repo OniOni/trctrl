@@ -10,7 +10,7 @@ STATUSES = {
 def list_torrents(status):
     c = rpc.TrClient()
     res = c.send('torrent-get', {
-        'fields': ['id', 'name', 'status', 'hashString', 'eta', 'leftUntilDone']
+        'fields': ['id', 'name', 'status', 'hashString', 'eta', 'leftUntilDone', 'uploadRatio']
     }).json()
 
     _all = False
@@ -19,9 +19,12 @@ def list_torrents(status):
     else:
         code = STATUSES[status]
 
-    t = table.Table("id", "name", "status", "done")
+    t = table.Table("id", "name", "status", "done", "ratio")
     t.append_rows([
-        {'id': t['hashString'], 'name': t['name'], 'status': t['status'], 'done': t['leftUntilDone']}
+        {'id': t['hashString'], 'name': t['name'],
+         'status': t['status'], 'done': t['leftUntilDone'],
+         'ratio': t['uploadRatio']
+        }
         for t in res['arguments']['torrents']
         if _all or t['status'] == code
     ])
